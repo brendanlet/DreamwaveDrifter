@@ -1,0 +1,49 @@
+Scripts: 
+	PGC:
+		PGC_Mesh:
+			This script is for the Procedurally Generated island battle arena. 
+			
+			Contains private class Chunk:
+				public Vector3[] verts
+        			public Vector2[] uv
+        			public int[] tris
+        			public Mesh mesh
+        			public MeshFilter meshFilter
+        			public MeshRenderer meshRenderer
+       			 	public MeshCollider meshCollider
+       			 	public GameObject gameObject
+        			public int x
+        			public int z
+			
+			Chunks contain all the procedural mesh data for a portion of the total mesh, with variables x and z used to keep track of its location relative to other chunks.
+
+			Stores chunks in 2d array.
+
+			Stores other basic serialized data for customization.
+
+			Awake()
+				Generates grid of chunks. O(n) with n number of chunks. Calls Generate n times.
+			Generate(Chunk chunk) 
+				Generates a mesh for the specified chunk. O(n + m) with n number of vertices and m number of triangles. Calls MountainCurved, PerlinNoise, MountainLinear, Flatshading once.
+			Flatshading(Chunk chunk)
+				Code borrowed from Sebastian Lague, modified to work with chunks. Creates new vertices and triangles to enable flatshading normals. O(n) with n number of triangles before call.
+			PerlinNoise(Chunk chunk)
+				Modifies the height of each vertex with respect to perlin noise. O(n) with n number of vertices. Calls FBM n times.
+			FBM(float x, float z)
+				Calculates multiple perlin noise based on given x and z coordinates. Constant time given consistent octave values.
+			MountainLinear(Chunk chunk, int mountainX, int mountainZ, float height, float slope)
+				Generates a mountain in the grid with a linear slope. O(n) with n number of vertices.
+			MountainCurved(Chunk chunk, int mountainX, int mountainZ, float height, float slope)
+				Generates a mountain in the grid with a gradually declining slope. O(n) with n number of vertices.
+			GetVertexIndex(int x, int z)
+				Helper function to keep track of vertices given their x and z coordinates. Constant time.
+			Start()
+				Applies generated meshes to each chunk. O(n) with n number of chunks.
+
+			Total Running Time: O(n*(m+l)) with n number of chunks, m number of vertices, l number of triangles.
+			Note that script runs only once on scene load.
+		
+		PGC_Mesh_Menu:
+			Nearly identical to PGC_Mesh with a few key differences. This script is for the rolling terrain effect for the main menu of the game. 
+			Unlike PGC_Mesh, this script will continuously generate new chunks and delete old chunks as terrain is moved towards and past the main camera.
+			Generation is handled once initially, and then again and again every few seconds. (There is a slight lag upon each chunk generation, could possibly be avoided with clever rearanging of pre-generated chunks. Too lazy to care tho).
